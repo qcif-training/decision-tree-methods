@@ -12,8 +12,8 @@ website:
         href: 00_workshop_guide.ipynb
       - text: "01_decision_tree_basics"
         href: 01_decision_tree_basics.ipynb
-      - text: "02_logistic_regression"
-        href: 02_logistic_regression.ipynb
+      - text: "02_decision_tree_classification"
+        href: 02_decision_tree_classification.ipynb
       - text: "03_random_forest_classification"
         href: 03_random_forest_classification.ipynb
       - text: "04_xgboost_classification"
