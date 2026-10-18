@@ -302,12 +302,15 @@ F_{t+1}(x) = F_t(x) + \eta \cdot h_t(x)
 <td><strong>XGBoost (Extreme Gradient Boosting)</strong> is an efficient implementation of gradient boosting.</td>
 </tr>
 <tr class="odd">
-<td>It includes several useful improvements: - <strong>Regularization</strong>: Controls model complexity and helps reduce overfitting. - <strong>Parallelization</strong>: Speeds up calculations used to find the best tree splits. - <strong>Missing Values</strong>: Learns which branch missing values should follow. - <strong>Tree Pruning</strong>: Removes branches that do not improve the model enough. - <strong>Column Subsampling</strong>: Allows each tree to use a selection of features.</td>
+<td>It includes several useful improvements:</td>
 </tr>
 <tr class="even">
-<td>For simplicity, we leave these settings at their default values and focus on tuning three key hyperparameters:</td>
+<td>- <strong>Regularization</strong>: Controls model complexity and helps reduce overfitting. - <strong>Parallelization</strong>: Speeds up calculations used to find the best tree splits. - <strong>Missing Values</strong>: Learns which branch missing values should follow. - <strong>Tree Pruning</strong>: Removes branches that do not improve the model enough. - <strong>Column Subsampling</strong>: Allows each tree to use a selection of features.</td>
 </tr>
 <tr class="odd">
+<td>For simplicity, we leave these settings at their default values and focus on tuning three key hyperparameters:</td>
+</tr>
+<tr class="even">
 <td>- <code>n_estimators</code>: Number of boosting rounds. - <code>max_depth</code>: Maximum depth of a tree. - <code>learning_rate</code>: Step size shrinkage used to prevent overfitting.</td>
 </tr>
 </tbody>
