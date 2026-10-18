@@ -400,6 +400,16 @@
     ]
   },
   {
+    "objectID": "06_xgboost_regression.html#what-is-xgboost",
+    "href": "06_xgboost_regression.html#what-is-xgboost",
+    "title": "XGBoost Regression with California Housing Data",
+    "section": "What is XGBoost?",
+    "text": "What is XGBoost?\nXGBoost (Extreme Gradient Boosting) is an efficient implementation of gradient boosting.\nIt includes several useful improvements:\n\nRegularization: Controls model complexity and helps reduce overfitting.\nParallelization: Speeds up calculations used to find the best tree splits.\nMissing Values: Learns which branch missing values should follow.\nTree Pruning: Removes branches that do not improve the model enough.\nColumn Subsampling: Allows each tree to use a selection of features.\n\nFor simplicity, we leave these settings at their default values and focus on tuning three key hyperparameters:\n\nn_estimators: Number of boosting rounds.\nmax_depth: Maximum depth of a tree.\nlearning_rate: Step size shrinkage used to prevent overfitting.",
+    "crumbs": [
+      "06_xgboost_regression"
+    ]
+  },
+  {
     "objectID": "06_xgboost_regression.html#role-of-the-learning-rate",
     "href": "06_xgboost_regression.html#role-of-the-learning-rate",
     "title": "XGBoost Regression with California Housing Data",
