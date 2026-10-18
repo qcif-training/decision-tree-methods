@@ -292,8 +292,8 @@ F_{t+1}(x) = F_t(x) + \eta \cdot h_t(x)
 </ul>
 <p><strong>Simple interpretation:</strong> Each new tree tries to reduce the prediction errors made by the current model.</p>
 <hr>
-<section id="what-is-xgboost" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-xgboost">What is XGBoost?</h2>
+<section id="what-is-xgboost" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-xgboost">What is XGBoost?</h3>
 <p><strong>XGBoost (Extreme Gradient Boosting)</strong> is an efficient implementation of gradient boosting.</p>
 <p>It includes several useful improvements:</p>
 <ul>
@@ -311,8 +311,8 @@ F_{t+1}(x) = F_t(x) + \eta \cdot h_t(x)
 </ul>
 <hr>
 </section>
-<section id="role-of-the-learning-rate" class="level2">
-<h2 class="anchored" data-anchor-id="role-of-the-learning-rate">Role of the Learning Rate</h2>
+<section id="role-of-the-learning-rate" class="level3">
+<h3 class="anchored" data-anchor-id="role-of-the-learning-rate">Role of the Learning Rate</h3>
 <p>The <strong>learning rate</strong> controls how much each new tree changes the model.</p>
 <table class="caption-top table">
 <colgroup>
@@ -340,8 +340,8 @@ F_{t+1}(x) = F_t(x) + \eta \cdot h_t(x)
 </ul>
 <hr>
 </section>
-<section id="evaluating-the-regression-model" class="level2">
-<h2 class="anchored" data-anchor-id="evaluating-the-regression-model">Evaluating the Regression Model</h2>
+<section id="evaluating-the-regression-model" class="level3">
+<h3 class="anchored" data-anchor-id="evaluating-the-regression-model">Evaluating the Regression Model</h3>
 <p>Regression models can be evaluated using:</p>
 <ul>
 <li><strong>Mean Absolute Error (MAE):</strong> Average size of the prediction errors.</li>
@@ -350,13 +350,13 @@ F_{t+1}(x) = F_t(x) + \eta \cdot h_t(x)
 </ul>
 <hr>
 </section>
-<section id="shap" class="level2">
-<h2 class="anchored" data-anchor-id="shap">SHAP</h2>
+<section id="shap" class="level3">
+<h3 class="anchored" data-anchor-id="shap">SHAP</h3>
 <p>We’ll evaluate model performance and interpret it using SHAP (SHapley Additive exPlanations).</p>
 <hr>
 </section>
-<section id="summary" class="level2">
-<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<section id="summary" class="level3">
+<h3 class="anchored" data-anchor-id="summary">Summary</h3>
 <p>Gradient Boosting adds trees sequentially to reduce prediction errors. XGBoost makes this process more efficient and adds controls that can reduce overfitting.</p>
 <p>For this regression example, XGBoost predicts a numerical value: the median house value.</p>
 <div id="a2e25896" class="cell" data-execution_count="14">

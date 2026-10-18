@@ -400,56 +400,6 @@
     ]
   },
   {
-    "objectID": "06_xgboost_regression.html#what-is-xgboost",
-    "href": "06_xgboost_regression.html#what-is-xgboost",
-    "title": "XGBoost Regression with California Housing Data",
-    "section": "What is XGBoost?",
-    "text": "What is XGBoost?\nXGBoost (Extreme Gradient Boosting) is an efficient implementation of gradient boosting.\nIt includes several useful improvements:\n\nRegularization: Controls model complexity and helps reduce overfitting.\nParallelization: Speeds up calculations used to find the best tree splits.\nMissing Values: Learns which branch missing values should follow.\nTree Pruning: Removes branches that do not improve the model enough.\nColumn Subsampling: Allows each tree to use a selection of features.\n\nFor simplicity, we leave these settings at their default values and focus on tuning three key hyperparameters:\n\nn_estimators: Number of boosting rounds.\nmax_depth: Maximum depth of a tree.\nlearning_rate: Step size shrinkage used to prevent overfitting.",
-    "crumbs": [
-      "06_xgboost_regression"
-    ]
-  },
-  {
-    "objectID": "06_xgboost_regression.html#role-of-the-learning-rate",
-    "href": "06_xgboost_regression.html#role-of-the-learning-rate",
-    "title": "XGBoost Regression with California Housing Data",
-    "section": "Role of the Learning Rate",
-    "text": "Role of the Learning Rate\nThe learning rate controls how much each new tree changes the model.\n\n\n\n\n\n\n\nLearning Rate\nBehavior\n\n\n\n\nLarger ($ \\()  | Learns faster and usually needs fewer trees, but may overfit                             |\n| Smaller (\\) $)\nLearns more gradually and usually needs more trees\n\n\n\nThe learning rate and number of trees should be considered together:\n\nSmaller learning rate → usually more trees\nLarger learning rate → usually fewer trees",
-    "crumbs": [
-      "06_xgboost_regression"
-    ]
-  },
-  {
-    "objectID": "06_xgboost_regression.html#evaluating-the-regression-model",
-    "href": "06_xgboost_regression.html#evaluating-the-regression-model",
-    "title": "XGBoost Regression with California Housing Data",
-    "section": "Evaluating the Regression Model",
-    "text": "Evaluating the Regression Model\nRegression models can be evaluated using:\n\nMean Absolute Error (MAE): Average size of the prediction errors.\nRoot Mean Squared Error (RMSE): Gives more weight to large errors.\n\\(R^2\\) score: Measures how much variation in the target is explained by the model.",
-    "crumbs": [
-      "06_xgboost_regression"
-    ]
-  },
-  {
-    "objectID": "06_xgboost_regression.html#shap",
-    "href": "06_xgboost_regression.html#shap",
-    "title": "XGBoost Regression with California Housing Data",
-    "section": "SHAP",
-    "text": "SHAP\nWe’ll evaluate model performance and interpret it using SHAP (SHapley Additive exPlanations).",
-    "crumbs": [
-      "06_xgboost_regression"
-    ]
-  },
-  {
-    "objectID": "06_xgboost_regression.html#summary",
-    "href": "06_xgboost_regression.html#summary",
-    "title": "XGBoost Regression with California Housing Data",
-    "section": "Summary",
-    "text": "Summary\nGradient Boosting adds trees sequentially to reduce prediction errors. XGBoost makes this process more efficient and adds controls that can reduce overfitting.\nFor this regression example, XGBoost predicts a numerical value: the median house value.\n\nimport pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nfrom sklearn.datasets import fetch_california_housing\nfrom xgboost import XGBRegressor\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import r2_score\n\nhousing = fetch_california_housing(as_frame=True)\n\nX = housing.data\ny = housing.target\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)",
-    "crumbs": [
-      "06_xgboost_regression"
-    ]
-  },
-  {
     "objectID": "06_xgboost_regression.html#hyperparameter-tuning-n_estimators",
     "href": "06_xgboost_regression.html#hyperparameter-tuning-n_estimators",
     "title": "XGBoost Regression with California Housing Data",
