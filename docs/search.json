@@ -413,8 +413,8 @@
     "objectID": "06_xgboost_regression.html#role-of-the-learning-rate",
     "href": "06_xgboost_regression.html#role-of-the-learning-rate",
     "title": "XGBoost Regression with California Housing Data",
-    "section": "Role of the Learning Rate ($ $)",
-    "text": "Role of the Learning Rate ($ $)\nThe learning rate controls how much each new tree changes the model.\n\n\n\n\n\n\n\nLearning Rate\nBehavior\n\n\n\n\nLarger ($ \\()  | Learns faster and usually needs fewer trees, but may overfit                             |\n| Smaller (\\) $)\nLearns more gradually and usually needs more trees\n\n\n\nThe learning rate and number of trees should be considered together:\n\nSmaller learning rate → usually more trees\nLarger learning rate → usually fewer trees",
+    "section": "Role of the Learning Rate",
+    "text": "Role of the Learning Rate\nThe learning rate controls how much each new tree changes the model.\n\n\n\n\n\n\n\nLearning Rate\nBehavior\n\n\n\n\nLarger ($ \\()  | Learns faster and usually needs fewer trees, but may overfit                             |\n| Smaller (\\) $)\nLearns more gradually and usually needs more trees\n\n\n\nThe learning rate and number of trees should be considered together:\n\nSmaller learning rate → usually more trees\nLarger learning rate → usually fewer trees",
     "crumbs": [
       "06_xgboost_regression"
     ]
