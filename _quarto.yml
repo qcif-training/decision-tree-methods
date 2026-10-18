@@ -22,6 +22,8 @@ website:
         href: 05_random_forest_regression.ipynb
       - text: "06_xgboost_regression"
         href: 06_xgboost_regression.ipynb
+      - text: 📦 Download All Notebooks
+        href: Notebooks.zip
 
 format:
   html:

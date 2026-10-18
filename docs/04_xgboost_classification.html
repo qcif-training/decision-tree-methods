@@ -215,6 +215,12 @@ window.Quarto = {
  <span class="menu-text">06_xgboost_regression</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Notebooks.zip" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">📦 Download All Notebooks</span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -225,14 +231,16 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#core-idea-of-gradient-boosting" id="toc-core-idea-of-gradient-boosting" class="nav-link active" data-scroll-target="#core-idea-of-gradient-boosting">🔁 Core Idea of Gradient Boosting</a></li>
-  <li><a href="#what-is-xgboost" id="toc-what-is-xgboost" class="nav-link" data-scroll-target="#what-is-xgboost">🚀 What is XGBoost?</a></li>
-  <li><a href="#role-of-the-learning-rate" id="toc-role-of-the-learning-rate" class="nav-link" data-scroll-target="#role-of-the-learning-rate">📉 Role of the Learning Rate ($ $)</a></li>
+  <li><a href="#what-is-xgboost" id="toc-what-is-xgboost" class="nav-link active" data-scroll-target="#what-is-xgboost">What is XGBoost?</a></li>
+  <li><a href="#role-of-the-learning-rate" id="toc-role-of-the-learning-rate" class="nav-link" data-scroll-target="#role-of-the-learning-rate">Role of the Learning Rate ($ $)</a></li>
+  <li><a href="#evaluating-the-classification-model" id="toc-evaluating-the-classification-model" class="nav-link" data-scroll-target="#evaluating-the-classification-model">Evaluating the Classification Model</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
   <li><a href="#hyperparameter-tuning-n_estimators" id="toc-hyperparameter-tuning-n_estimators" class="nav-link" data-scroll-target="#hyperparameter-tuning-n_estimators">🔧 Hyperparameter Tuning: <code>n_estimators</code></a></li>
   <li><a href="#hyperparameter-tuning-max_depth" id="toc-hyperparameter-tuning-max_depth" class="nav-link" data-scroll-target="#hyperparameter-tuning-max_depth">🔧 Hyperparameter Tuning: <code>max_depth</code></a></li>
   <li><a href="#hyperparameter-tuning-learning_rate" id="toc-hyperparameter-tuning-learning_rate" class="nav-link" data-scroll-target="#hyperparameter-tuning-learning_rate">🔧 Hyperparameter Tuning: <code>learning_rate</code></a></li>
-  <li><a href="#feature-importance-with-shap" id="toc-feature-importance-with-shap" class="nav-link" data-scroll-target="#feature-importance-with-shap">🔍 Feature Importance with SHAP</a></li>
-  <li><a href="#feature-importance-with-shap-1" id="toc-feature-importance-with-shap-1" class="nav-link" data-scroll-target="#feature-importance-with-shap-1">🧠 Feature Importance with SHAP</a>
+  <li><a href="#final-model-with-selected-hyperparameters" id="toc-final-model-with-selected-hyperparameters" class="nav-link" data-scroll-target="#final-model-with-selected-hyperparameters">✅ Final Model with Selected Hyperparameters</a></li>
+  <li><a href="#evaluating-the-classification-model---confusion-matrix" id="toc-evaluating-the-classification-model---confusion-matrix" class="nav-link" data-scroll-target="#evaluating-the-classification-model---confusion-matrix">Evaluating the Classification Model - Confusion Matrix</a></li>
+  <li><a href="#feature-importance-with-shap" id="toc-feature-importance-with-shap" class="nav-link" data-scroll-target="#feature-importance-with-shap">🧠 Feature Importance with SHAP</a>
   <ul class="collapse">
   <li><a href="#interpreting-the-shap-summary-plot" id="toc-interpreting-the-shap-summary-plot" class="nav-link" data-scroll-target="#interpreting-the-shap-summary-plot">📊 Interpreting the SHAP Summary Plot</a></li>
   </ul></li>
@@ -261,30 +269,35 @@ window.Quarto = {
 </header>
 
 
-<div id="f92fad29" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># import os</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># # Set working directory manually on Gadi to be able to load csv files</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># user = os.getenv('USER')</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># os.chdir('/scratch/cd82/'+user+'/notebooks/')</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p><strong>Gradient Boosting</strong> is a powerful ensemble technique that builds models sequentially. Each new model is trained to correct the errors made by the previous models. The idea is to <strong>minimize a loss function</strong> (like log loss for classification or MSE for regression) by adding weak learners (usually shallow decision trees) in a stage-wise manner.</p>
-<section id="core-idea-of-gradient-boosting" class="level3">
-<h3 class="anchored" data-anchor-id="core-idea-of-gradient-boosting">🔁 Core Idea of Gradient Boosting</h3>
-<p>At each step, a new model is trained to predict the <strong>residuals (errors)</strong> of the previous model: <span class="math display">\[
-\text{Residual}_i = y_i - \hat{y}_i
-\]</span> Then, this new model is added to the overall prediction: <span class="math display">\[
-\hat{y}^{(t+1)} = \hat{y}^{(t)} + \eta \cdot h_t(x)
-\]</span> Where: - $ ^{(t)} $: current prediction - $ h_t(x) $: new weak learner (tree) - $ $: learning rate (controls the step size)</p>
+<p><strong>Gradient Boosting</strong> builds a model one tree at a time. Each new tree tries to improve the predictions made by the trees already built.</p>
+<p>For classification, the model commonly minimizes <strong>log loss</strong></p>
+<p>At each stage, a new tree is added to the current model: <span class="math display">\[
+F_{t+1}(x) = F_t(x) + \eta \cdot h_t(x)
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(F_t(x)\)</span> is the current model score.</li>
+<li><span class="math inline">\(h_t(x)\)</span> is the new decision tree.</li>
+<li><span class="math inline">\(\eta\)</span> is the learning rate</li>
+</ul>
+<p><strong>Simple interpretation:</strong> Each new tree makes a small correction to the current model.</p>
+<p>For binary classification, the final model score is converted into a probability, such as the probability of heart disease.</p>
 <hr>
-</section>
 <section id="what-is-xgboost" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-xgboost">🚀 What is XGBoost?</h2>
-<p><strong>XGBoost (Extreme Gradient Boosting)</strong> is an optimized version of gradient boosting that includes several improvements: - <strong>Regularization</strong>: Prevents overfitting using $ L1 $ and $ L2 $ penalties. - <strong>Parallelization</strong>: Faster training via parallel tree construction. - <strong>Handling of Missing Values</strong>: Smart ways to deal with NaNs automatically. - <strong>Tree Pruning</strong>: Uses a depth-first approach and pruning with a minimum loss reduction (<code>gamma</code>). - <strong>Column Subsampling</strong>: Introduces randomness (like Random Forest) via <code>colsample_bytree</code>.</p>
+<h2 class="anchored" data-anchor-id="what-is-xgboost">What is XGBoost?</h2>
+<p><strong>XGBoost (Extreme Gradient Boosting)</strong> is an efficient implementation of gradient boosting.</p>
+<p>It includes several useful improvements: - <strong>Regularization</strong>: Controls model complexity and helps reduce overfitting. - <strong>Parallelization</strong>: Speeds up calculations used to find the best tree splits. - <strong>Missing Values</strong>: Learns which branch missing values should follow. - <strong>Tree Pruning</strong>: Removes branches that do not improve the model enough. - <strong>Column Subsampling</strong>: Allows each tree to use a selection of features.</p>
+<p>For simplicity, we leave these settings at their default values and focus on tuning three key hyperparameters:</p>
+<ul>
+<li><code>n_estimators</code>: Number of boosting rounds.</li>
+<li><code>max_depth</code>: Maximum depth of a tree.</li>
+<li><code>learning_rate</code>: Step size shrinkage used to prevent overfitting.</li>
+</ul>
 <hr>
 </section>
 <section id="role-of-the-learning-rate" class="level2">
-<h2 class="anchored" data-anchor-id="role-of-the-learning-rate">📉 Role of the Learning Rate ($ $)</h2>
-<p>The <strong>learning rate</strong> determines how much each tree contributes to the final prediction. It’s one of the most important hyperparameters in XGBoost:</p>
+<h2 class="anchored" data-anchor-id="role-of-the-learning-rate">Role of the Learning Rate ($ $)</h2>
+<p>The <strong>learning rate</strong> controls how much each new tree changes the model.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 20%">
@@ -298,69 +311,95 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td>High ($ <span class="math inline">\()  | Faster learning but may overfit.                             |
-| Low (\)</span> $)</td>
-<td>Slower learning, but often better generalization. Needs more trees.</td>
+<td>Larger ($ <span class="math inline">\()  | Learns faster and usually needs fewer trees, but may overfit                             |
+| Smaller (\)</span> $)</td>
+<td>Learns more gradually and usually needs more trees</td>
 </tr>
 </tbody>
 </table>
-<p>A small learning rate with a high number of estimators is generally a safer and more robust approach.</p>
+<p>The learning rate and number of trees should be considered together:</p>
+<ul>
+<li><strong>Smaller learning rate → usually more trees</strong></li>
+<li><strong>Larger learning rate → usually fewer trees</strong></li>
+</ul>
 <hr>
-<p>📌 <strong>Summary</strong>:<br>
-Gradient Boosting builds an ensemble of models to correct previous mistakes. XGBoost makes this process faster, more regularized, and scalable. The learning rate is a key tuning knob that balances speed and generalization.</p>
+</section>
+<section id="evaluating-the-classification-model" class="level2">
+<h2 class="anchored" data-anchor-id="evaluating-the-classification-model">Evaluating the Classification Model</h2>
+<p>Classification models can be evaluated using:</p>
+<ul>
+<li><strong>Accuracy:</strong> The proportion of predictions that the model classified correctly.</li>
+<li><strong>Confusion matrix:</strong> A table comparing the predicted classes with the actual classes.</li>
+</ul>
+<p>For heart disease classification, the confusion matrix shows:</p>
+<ul>
+<li><strong>True negative:</strong> Correctly predicted no heart disease.</li>
+<li><strong>True positive:</strong> Correctly predicted heart disease.</li>
+<li><strong>False positive:</strong> Predicted heart disease when it was not present.</li>
+<li><strong>False negative:</strong> Predicted no heart disease when it was present.</li>
+</ul>
+<hr>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>Gradient Boosting adds trees sequentially to improve the current model. XGBoost makes this process more efficient and adds controls that can reduce overfitting.</p>
+<p>For this classification example, XGBoost produces the estimated probability of:</p>
+<ul>
+<li>0: No heart disease</li>
+<li>1: Heart disease</li>
+</ul>
+<div id="a2e25896" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="bed578de-ee14-4d40-aa18-2f98e5b39ee8" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> shap</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report, ConfusionMatrixDisplay, accuracy_score</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> xgboost <span class="im">import</span> XGBClassifier</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the dataset</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>data_url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/qcif-training/decision-tree-methods/main/heart.csv"</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(data_url)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> (</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    df.drop(columns<span class="op">=</span>[<span class="st">"id"</span>, <span class="st">"dataset"</span>])</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>      .rename(columns<span class="op">=</span>{<span class="st">"num"</span>: <span class="st">"target"</span>})</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"target"</span>] <span class="op">=</span> (df[<span class="st">"target"</span>] <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#converts categorical text data into numerical columns using one-hot encoding technique, drop redundant data sex_male=0 means female</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.get_dummies(df, drop_first<span class="op">=</span><span class="va">True</span>, dtype<span class="op">=</span><span class="bu">int</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.fillna(df.median(numeric_only<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Split the prepared dataset into features and target</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df.drop(<span class="st">"target"</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">"target"</span>]</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep 30% of the data aside for testing, stratified sampling for 0 and 1 class, stratify=y</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.30</span>,  random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training rows: </span><span class="sc">{</span><span class="bu">len</span>(X_train)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test rows: </span><span class="sc">{</span><span class="bu">len</span>(X_test)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Training rows: 644
+Test rows: 276</code></pre>
+</div>
+</div>
 <p>We will focus on three key hyperparameters: - <code>n_estimators</code>: Number of boosting rounds. - <code>max_depth</code>: Maximum depth of a tree. - <code>learning_rate</code>: Step size shrinkage used to prevent overfitting.</p>
 <p>We’ll also evaluate model performance and interpret it using SHAP (SHapley Additive exPlanations).</p>
-<div id="a2e25896" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># import seaborn as sns</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> xgboost <span class="im">import</span> XGBClassifier</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> shap</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report, ConfusionMatrixDisplay</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>data_url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/qcif-training/decision-tree-methods/main/heart.csv"</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(data_url)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> (</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    df.drop(columns<span class="op">=</span>[<span class="st">"id"</span>, <span class="st">"dataset"</span>])</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>      .rename(columns<span class="op">=</span>{<span class="st">"thalch"</span>: <span class="st">"thalach"</span>, <span class="st">"num"</span>: <span class="st">"target"</span>})</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"target"</span>] <span class="op">=</span> (df[<span class="st">"target"</span>] <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.get_dummies(df, drop_first<span class="op">=</span><span class="va">True</span>, dtype<span class="op">=</span><span class="bu">int</span>)</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.fillna(df.median(numeric_only<span class="op">=</span><span class="va">True</span>))</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df.drop(<span class="st">"target"</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">"target"</span>]</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.3</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-error">
-<div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg ansi-bold">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg ansi-bold">ModuleNotFoundError</span>                       Traceback (most recent call last)
-Cell <span class="ansi-green-fg ansi-bold">In[3], line 7</span>
-<span class="ansi-green-fg">      5</span> <span style="font-weight:bold;color:rgb(0,135,0)">from</span> <span style="font-weight:bold;color:rgb(0,0,255)">sklearn</span><span style="font-weight:bold;color:rgb(0,0,255)">.</span><span style="font-weight:bold;color:rgb(0,0,255)">model_selection</span> <span style="font-weight:bold;color:rgb(0,135,0)">import</span> train_test_split
-<span class="ansi-green-fg">      6</span> <span style="font-weight:bold;color:rgb(0,135,0)">from</span> <span style="font-weight:bold;color:rgb(0,0,255)">sklearn</span><span style="font-weight:bold;color:rgb(0,0,255)">.</span><span style="font-weight:bold;color:rgb(0,0,255)">metrics</span> <span style="font-weight:bold;color:rgb(0,135,0)">import</span> accuracy_score
-<span class="ansi-green-fg ansi-bold">----&gt; 7</span> <span style="font-weight:bold;color:rgb(0,135,0)">from</span> <span style="font-weight:bold;color:rgb(0,0,255)">xgboost</span> <span style="font-weight:bold;color:rgb(0,135,0)">import</span> XGBClassifier
-<span class="ansi-green-fg">      8</span> <span style="font-weight:bold;color:rgb(0,135,0)">import</span> <span style="font-weight:bold;color:rgb(0,0,255)">shap</span>
-<span class="ansi-green-fg">      9</span> <span style="font-weight:bold;color:rgb(0,135,0)">from</span> <span style="font-weight:bold;color:rgb(0,0,255)">sklearn</span><span style="font-weight:bold;color:rgb(0,0,255)">.</span><span style="font-weight:bold;color:rgb(0,0,255)">metrics</span> <span style="font-weight:bold;color:rgb(0,135,0)">import</span> classification_report, ConfusionMatrixDisplay
-
-<span class="ansi-red-fg ansi-bold">ModuleNotFoundError</span>: No module named 'xgboost'</pre>
-</div>
-</div>
-</div>
 </section>
 <section id="hyperparameter-tuning-n_estimators" class="level2">
 <h2 class="anchored" data-anchor-id="hyperparameter-tuning-n_estimators">🔧 Hyperparameter Tuning: <code>n_estimators</code></h2>
 <p>The <code>n_estimators</code> parameter defines the number of boosting rounds (trees). Increasing it can improve performance but might lead to overfitting.</p>
-<div id="141e54a1" class="cell">
+<div id="141e54a1" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;,&quot;height&quot;:472}}" data-outputid="7fa38342-1a01-402d-8e88-c2b20bb0b0da" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>estimators <span class="op">=</span> [<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">25</span>, <span class="dv">30</span>, <span class="dv">35</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>]</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>train_scores, test_scores <span class="op">=</span> [], []</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> estimators:</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    clf <span class="op">=</span> XGBClassifier(n_estimators<span class="op">=</span>n, learning_rate<span class="op">=</span><span class="fl">0.002</span>,  eval_metric<span class="op">=</span><span class="st">'logloss'</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    clf <span class="op">=</span> XGBClassifier(n_estimators<span class="op">=</span>n, eval_metric<span class="op">=</span><span class="st">'logloss'</span>)</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    clf.fit(X_train, y_train)</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    train_scores.append(accuracy_score(y_train, clf.predict(X_train)))</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    test_scores.append(accuracy_score(y_test, clf.predict(X_test)))</span>
@@ -376,7 +415,7 @@ Cell <span class="ansi-green-fg ansi-bold">In[3], line 7</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04_xgboost_classification_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="04_xgboost_classification_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -385,7 +424,7 @@ Cell <span class="ansi-green-fg ansi-bold">In[3], line 7</span>
 <section id="hyperparameter-tuning-max_depth" class="level2">
 <h2 class="anchored" data-anchor-id="hyperparameter-tuning-max_depth">🔧 Hyperparameter Tuning: <code>max_depth</code></h2>
 <p>The <code>max_depth</code> parameter controls the complexity of each tree. Deeper trees can learn more complex patterns but may overfit.</p>
-<div id="d8f5c595" class="cell">
+<div id="d8f5c595" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;,&quot;height&quot;:472}}" data-outputid="6e6cc0ad-2ed0-4647-a8ed-1a092a86adbb" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>depths <span class="op">=</span> [<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">10</span>]</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>train_scores, test_scores <span class="op">=</span> [], []</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -406,7 +445,7 @@ Cell <span class="ansi-green-fg ansi-bold">In[3], line 7</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04_xgboost_classification_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="04_xgboost_classification_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -415,7 +454,7 @@ Cell <span class="ansi-green-fg ansi-bold">In[3], line 7</span>
 <section id="hyperparameter-tuning-learning_rate" class="level2">
 <h2 class="anchored" data-anchor-id="hyperparameter-tuning-learning_rate">🔧 Hyperparameter Tuning: <code>learning_rate</code></h2>
 <p>The <code>learning_rate</code> parameter shrinks the contribution of each tree. Lower values require more trees but improve generalization.</p>
-<div id="1776e2db" class="cell">
+<div id="1776e2db" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;,&quot;height&quot;:472}}" data-outputid="96ce9594-e665-43d2-e89c-9e84de705e4f" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>rates <span class="op">=</span> [<span class="fl">0.01</span>, <span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>]</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>train_scores, test_scores <span class="op">=</span> [], []</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -436,60 +475,72 @@ Cell <span class="ansi-green-fg ansi-bold">In[3], line 7</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04_xgboost_classification_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="04_xgboost_classification_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="final-model-with-selected-hyperparameters" class="level2">
+<h2 class="anchored" data-anchor-id="final-model-with-selected-hyperparameters">✅ Final Model with Selected Hyperparameters</h2>
+<p>We will now train one final tree using a moderate depth and larger leaves. These settings keep the tree readable and reduce overfitting.</p>
+<div id="526389aa" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="8e8a8d2d-ca8c-483b-e7a2-ec88415ee7c5" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>final_clf <span class="op">=</span> XGBClassifier(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    n_estimators<span class="op">=</span><span class="dv">50</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    max_depth<span class="op">=</span><span class="dv">6</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    learning_rate<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    eval_metric<span class="op">=</span><span class="st">'logloss'</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>final_clf.fit(X_train, y_train)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Accuracy</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>train_acc <span class="op">=</span> final_clf.score(X_train, y_train)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>test_acc <span class="op">=</span> final_clf.score(X_test, y_test)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Train Accuracy: </span><span class="sc">{</span>train_acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test Accuracy: </span><span class="sc">{</span>test_acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Train Accuracy: 1.000
+Test Accuracy: 0.837</code></pre>
+</div>
+</div>
+</section>
+<section id="evaluating-the-classification-model---confusion-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="evaluating-the-classification-model---confusion-matrix">Evaluating the Classification Model - Confusion Matrix</h2>
+<p>A confusion matrix is a table used to describe the performance of a classification model.</p>
+<div id="4d5fe568" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;,&quot;height&quot;:628}}" data-outputid="e1ceea71-3b2c-4e71-c719-c072bdc3795c" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> final_clf.predict(X_test)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_test, y_pred, target_names<span class="op">=</span>[<span class="st">"No disease"</span>, <span class="st">"Disease"</span>]))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>ConfusionMatrixDisplay.from_predictions(y_test, y_pred,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                                        display_labels<span class="op">=</span>[<span class="st">"No disease"</span>, <span class="st">"Disease"</span>],</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                                        cmap<span class="op">=</span><span class="st">"Blues"</span>, colorbar<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Normalized Confusion Matrix"</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              precision    recall  f1-score   support
+
+  No disease       0.80      0.82      0.81       120
+     Disease       0.86      0.85      0.85       156
+
+    accuracy                           0.84       276
+   macro avg       0.83      0.84      0.83       276
+weighted avg       0.84      0.84      0.84       276
+</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_xgboost_classification_files/figure-html/cell-7-output-2.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
 <section id="feature-importance-with-shap" class="level2">
-<h2 class="anchored" data-anchor-id="feature-importance-with-shap">🔍 Feature Importance with SHAP</h2>
-<p>Now let’s interpret the model using <strong>SHAP values</strong> to see which features were most influential.</p>
-<div id="526389aa" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>final_clf <span class="op">=</span> XGBClassifier(learning_rate<span class="op">=</span><span class="fl">0.1</span>, max_depth<span class="op">=</span><span class="dv">10</span>,n_estimators<span class="op">=</span><span class="dv">200</span>, eval_metric<span class="op">=</span><span class="st">'logloss'</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>final_clf.fit(X_train, y_train)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Accuracy</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>train_acc <span class="op">=</span> final_clf.score(X_train, y_train)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>test_acc <span class="op">=</span> final_clf.score(X_test, y_test)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Train Accuracy: </span><span class="sc">{</span>train_acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test Accuracy: </span><span class="sc">{</span>test_acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Train Accuracy: 1.000
-Test Accuracy: 0.990</code></pre>
-</div>
-</div>
-<div id="4d5fe568" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> final_clf.predict(X_test)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_test, y_pred))</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>ConfusionMatrixDisplay.from_estimator(final_clf, X_test, y_test)</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Normalized Confusion Matrix"</span>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>              precision    recall  f1-score   support
-
-           0       0.98      1.00      0.99       159
-           1       1.00      0.98      0.99       149
-
-    accuracy                           0.99       308
-   macro avg       0.99      0.99      0.99       308
-weighted avg       0.99      0.99      0.99       308
-</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="04_xgboost_classification_files/figure-html/cell-8-output-2.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="feature-importance-with-shap-1" class="level2">
-<h2 class="anchored" data-anchor-id="feature-importance-with-shap-1">🧠 Feature Importance with SHAP</h2>
+<h2 class="anchored" data-anchor-id="feature-importance-with-shap">🧠 Feature Importance with SHAP</h2>
 <p>We’ll use SHAP (SHapley Additive exPlanations) to understand how different features contribute to the model’s predictions.</p>
 <p>This helps us: - Identify the most influential features - Understand direction and magnitude of impact</p>
 <section id="interpreting-the-shap-summary-plot" class="level3">
@@ -535,18 +586,26 @@ weighted avg       0.99      0.99      0.99       308
 </table>
 <p><strong>🧠 Example Interpretation:</strong><br>
 If the “Age” feature has mostly red dots (high values) with positive SHAP values, it means higher ages are pushing predictions toward the positive class.</p>
-<div id="dab333f0" class="cell">
+<div id="dab333f0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;,&quot;height&quot;:514}}" data-outputid="5462c630-7881-4af5-c724-4c2f5668d768" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> shap</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>explainer <span class="op">=</span> shap.Explainer(final_clf, X_train)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>n_datapoints <span class="op">=</span> <span class="dv">100</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>shap_values <span class="op">=</span> explainer(X_test[:n_datapoints])</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>shap.summary_plot(shap_values, X_test[:n_datapoints])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Select the first 100 test records</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>X_sample <span class="op">=</span> X_test.head(<span class="dv">100</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Create an explainer that supports categorical tree splits</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>explainer <span class="op">=</span> shap.TreeExplainer(</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    final_clf,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    feature_perturbation<span class="op">=</span><span class="st">"tree_path_dependent"</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate and display SHAP values</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>shap_values <span class="op">=</span> explainer(X_sample)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co"># shap.summary_plot(shap_values, X_sample)</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>shap.plots.beeswarm(shap_values)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04_xgboost_classification_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="04_xgboost_classification_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
