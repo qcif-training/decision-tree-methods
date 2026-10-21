@@ -1,4 +1,4 @@
-MedInc,HouseAge,AveRooms,AveBedrms,Population,AveOccup,Latitude,Longitude,MedHouseVal
+MedInc,HouseAge,TotalRooms,TotalBedrooms,Population,TotalOccup,Latitude,Longitude,MedHouseVal
 8.3252,41,880,129,322,126,37.88,-122.23,452600
 8.3014,21,7099,1106,2401,1138,37.86,-122.22,358500
 7.2574,52,1467,190,496,177,37.85,-122.24,352100
